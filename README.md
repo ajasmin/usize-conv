@@ -1,9 +1,10 @@
 # usize-conv
 
-![crates.io](https://img.shields.io/crates/v/usize-conv)
-![docs.rs](https://img.shields.io/docsrs/usize-conv)
-![MSRV](https://img.shields.io/badge/MSRV-1.85-blue)
-![no_std](https://img.shields.io/badge/no__std-compatible-blue)
+[![crates.io](https://img.shields.io/crates/v/usize-conv)](https://crates.io/crates/usize-conv)
+[![docs.rs](https://img.shields.io/docsrs/usize-conv)](https://docs.rs/usize-conv)
+[![CI](https://github.com/ajasmin/usize-conv/actions/workflows/ci.yml/badge.svg)](https://github.com/ajasmin/usize-conv/actions/workflows/ci.yml)
+[![MSRV](https://img.shields.io/badge/MSRV-1.85-blue)](https://github.com/ajasmin/usize-conv/blob/main/Cargo.toml)
+[![no_std](https://img.shields.io/badge/no__std-compatible-blue)](https://docs.rs/usize-conv)
 
 Infallible integer conversions to and from `usize` and `isize` under explicit
 portability guarantees.
