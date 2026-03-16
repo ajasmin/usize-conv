@@ -76,5 +76,7 @@ doc:
 	cargo doc --features "$(DOC_FEATURES)" --no-deps --open
 
 check-msrv-badge:
-	@grep -q "MSRV-$(MSRV)-blue" README.md || \
+	@grep -q "^\[MSRV\]: https://img.shields.io/badge/MSRV-$(MSRV)-blue" README.md || \
 		( echo "MSRV badge mismatch (Cargo.toml: $(MSRV))"; exit 1 )
+	@grep -q "^\[rust_rel\]: https://blog.rust-lang.org/.*/Rust-$(MSRV)\.0/" README.md || \
+		( echo "Rust release link mismatch (Cargo.toml: $(MSRV))"; exit 1 )
