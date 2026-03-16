@@ -16,5 +16,8 @@ min-usize-32 = []
 min-usize-64 = ["min-usize-32"]
 from_usize = []
 
+[package.metadata.docs.rs]
+all-features = true
+
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
