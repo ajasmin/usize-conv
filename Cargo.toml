@@ -1,6 +1,6 @@
 [package]
 name = "usize-conv"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.85"
 description = "Infallible integer conversions to and from usize and isize under explicit portability guarantees"
