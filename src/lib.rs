@@ -8,6 +8,7 @@
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::cast_possible_wrap)]
 
+#[cfg(any(feature = "min-usize-32", feature = "from_usize"))]
 macro_rules! assert_infallible_cast {
     ($src:tt => $dst:tt) => {
         const _: () = {

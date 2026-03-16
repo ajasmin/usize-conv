@@ -41,7 +41,8 @@ test:
 				cargo test --lib --features "$$f"; \
 				;; \
 		esac; \
-	done
+	done; \
+	cargo check --no-default-features
 
 doctest:
 	cargo test --doc --features "$(DOC_FEATURES)"
@@ -63,7 +64,8 @@ clippy:
 				cargo clippy --features "$$f" -- -D warnings; \
 				;; \
 		esac; \
-	done
+	done; \
+	cargo clippy --no-default-features -- -D warnings
 
 fmt:
 	cargo fmt --check
