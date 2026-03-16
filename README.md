@@ -24,11 +24,12 @@ Rust provides many safe integer conversions through `From`, `Into`, and
 `TryFrom`. However, conversions involving the machine-sized integers
 `usize` and `isize` can be awkward in portable code.
 
-Some integer conversions are *infallible on common architectures*, but Rust
-only provides infallible conversions that assume `usize ≥ 16 bits`, the
-minimum width guaranteed by the language (for example `usize::from(42_u8)`).
-As a result, conversions that are perfectly safe on 32-bit or 64-bit systems
-may still require `TryFrom` or explicit casts.
+Some integer conversions are *infallible on common architectures*, but the
+standard library must provide the same set of infallible conversions on all
+targets. Because Rust only guarantees `usize ≥ 16 bits`, conversions that are
+perfectly safe on 32-bit or 64-bit systems may still require `TryFrom` or
+explicit casts (for example `usize::from(42_u8)` is allowed, but `u32 → usize`
+is not).
 
 Using `as` casts is concise, but they may silently *truncate values or lose
 sign information*, which can hide bugs.
@@ -74,28 +75,27 @@ contract is selected.
 
 ### Conversions from `usize` / `isize`
 
-When the `from_usize` feature is enabled, widening conversions are provided
-through the traits `ToU64`, `ToU128`, `ToI64`, and `ToI128`.
+The `from_usize` feature enables additional infallible widening conversions
+from `usize` and `isize`. These are provided through the extension traits
+`ToU64`, `ToU128`, `ToI64`, and `ToI128`, and are valid on all 64-bit systems:
 
-The following conversions are available:
-
-- `usize → u64`
-- `usize → u128`
-- `usize → i128`
-- `isize → i64`
-- `isize → i128`
+- `usize.to_u64()`
+- `usize.to_u128()`
+- `usize.to_i128()`
+- `isize.to_i64()`
+- `isize.to_i128()`
 
 Conversions into narrower integer types (such as `usize → u32`) are not
-provided. While these may be infallible on smaller targets, they would
-break portability on common 64-bit systems.
+provided. While these may be infallible on smaller targets, they would break
+portability on common 64-bit systems.
 
 ## When to use this crate
 
 Use `usize-conv` when:
 
 - Your code needs succinct **infallible conversions involving `usize` or `isize`**.
-- The conversion is safe under your **portability assumptions** (for example,
-  code that only runs on 32-bit or 64-bit systems).
+- The conversion is safe under your **portability assumptions** (e.g. code
+  targeting 32-bit or 64-bit systems).
 - You want to avoid `TryFrom` in cases where failure **cannot occur on the
   targets you support**.
 
@@ -116,26 +116,16 @@ You **do not need this crate** if:
 
 ## For library authors
 
-`usize-conv` is particularly useful in generic code where integer types are not
-known ahead of time.
-
-The standard library provides the same set of infallible integer conversions on
-all targets, because they must remain valid under Rust’s guarantee that
-`usize ≥ 16 bits`. As a result, conversions that are perfectly safe on common
-32-bit or 64-bit systems may still require `TryFrom`.
-
-`usize-conv` exposes additional infallible conversions when they are guaranteed
-to be safe under a stronger portability contract.
+`usize-conv` is particularly useful in generic code where the set of infallible
+conversions available on the target platform is not known ahead of time.
 
 For example:
 
-```rust
-use usize_conv::ToUsize;
+    use usize_conv::ToUsize;
 
-fn index<T: ToUsize>(i: T) -> usize {
-    i.to_usize()
-}
-```
+    fn index<T: ToUsize>(i: T) -> usize {
+        i.to_usize()
+    }
 
 The available implementations depend on the portability contract selected by
 the final application. This allows libraries to remain portable while still
