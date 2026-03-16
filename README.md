@@ -57,11 +57,11 @@ supported targets are not implemented.
 
 The crate exposes conversions according to explicit portability floors:
 
-| Feature        | Guarantee                                                                               |
-|----------------|-----------------------------------------------------------------------------------------|
-| `min-usize-32` | Code must run on targets where `usize ≥ 32 bits`                                        |
-| `min-usize-64` | Code must run on targets where `usize ≥ 64 bits`                                        |
-| `from_usize`   | Enable widening conversions from `usize` / `isize` that are valid on all 64-bit systems |
+| Feature        | Guarantee                                                                                 |
+|----------------|-------------------------------------------------------------------------------------------|
+| `min-usize-32` | Code must run on targets where `usize ≥ 32 bits`                                          |
+| `min-usize-64` | Code must run on targets where `usize ≥ 64 bits`                                          |
+| `from_usize`   | Enable infallible conversions from `usize` / `isize` that are valid on all 64-bit systems |
 
 
 
@@ -75,7 +75,7 @@ contract is selected.
 
 ### Conversions from `usize` / `isize`
 
-The `from_usize` feature enables additional infallible widening conversions
+The `from_usize` feature enables additional infallible conversions
 from `usize` and `isize`. These are provided through the extension traits
 `ToU64`, `ToU128`, `ToI64`, and `ToI128`, and are valid on all 64-bit systems:
 
