@@ -1,10 +1,15 @@
-# usize-conv
+# usize-conv &emsp; [![no_std]][lib_rs] [![MSRV]][rust_rel] [![Latest Version]][crates.io] [![Build Status]][actions] [![docs]][docs.rs]
 
-[![crates.io](https://img.shields.io/crates/v/usize-conv)](https://crates.io/crates/usize-conv)
-[![docs.rs](https://img.shields.io/docsrs/usize-conv)](https://docs.rs/usize-conv)
-[![CI](https://github.com/ajasmin/usize-conv/actions/workflows/ci.yml/badge.svg)](https://github.com/ajasmin/usize-conv/actions/workflows/ci.yml)
-[![MSRV](https://img.shields.io/badge/MSRV-1.85-blue)](https://github.com/ajasmin/usize-conv/blob/main/Cargo.toml)
-[![no_std](https://img.shields.io/badge/no__std-compatible-blue)](https://github.com/ajasmin/usize-conv/blob/main/src/lib.rs)
+[Build Status]: https://img.shields.io/github/actions/workflow/status/ajasmin/usize-conv/ci.yml?branch=main
+[actions]: https://github.com/ajasmin/usize-conv/actions?query=branch%3Amain
+[Latest Version]: https://img.shields.io/crates/v/usize-conv
+[crates.io]: https://crates.io/crates/usize-conv
+[docs]: https://img.shields.io/docsrs/usize-conv
+[docs.rs]: https://docs.rs/usize-conv/0.1.1/usize_conv/
+[MSRV]: https://img.shields.io/badge/MSRV-1.85-blue
+[rust_rel]: https://blog.rust-lang.org/2025/02/20/Rust-1.85.0/
+[no_std]: https://img.shields.io/badge/no__std-compatible-blue
+[lib_rs]: https://github.com/ajasmin/usize-conv/blob/readme_tweak/src/lib.rs
 
 Infallible integer conversions to and from `usize` and `isize` under explicit
 portability guarantees.
@@ -67,7 +72,7 @@ The crate exposes conversions according to explicit portability floors:
 
 
 `min-usize-64` implies `min-usize-32`. If both features are enabled (for
-example through [Cargo feature unification][1]), the larger portability floor
+example through [Cargo feature unification][unification]), the larger portability floor
 applies.
 
 If no portability feature is enabled, the crate compiles but does not expose
@@ -150,4 +155,4 @@ ensure the selected portability contract is compatible with the compilation
 target. For example, enabling `min-usize-64` on a 32-bit target will cause the
 build to fail.
 
-[1]: https://doc.rust-lang.org/cargo/reference/features.html#feature-unification
+[unification]: https://doc.rust-lang.org/cargo/reference/features.html#feature-unification
