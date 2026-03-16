@@ -1,15 +1,15 @@
 # usize-conv &emsp; [![no_std]][lib_rs] [![MSRV]][rust_rel] [![Latest Version]][crates.io] [![Build Status]][actions] [![docs]][docs.rs]
 
-[Build Status]: https://img.shields.io/github/actions/workflow/status/ajasmin/usize-conv/ci.yml?branch=main
-[actions]: https://github.com/ajasmin/usize-conv/actions?query=branch%3Amain
-[Latest Version]: https://img.shields.io/crates/v/usize-conv
-[crates.io]: https://crates.io/crates/usize-conv
-[docs]: https://img.shields.io/docsrs/usize-conv
-[docs.rs]: https://docs.rs/usize-conv/0.1.1/usize_conv/
+[no_std]: https://img.shields.io/badge/no__std-compatible-blue
+[lib_rs]: https://github.com/ajasmin/usize-conv/blob/main/src/lib.rs
 [MSRV]: https://img.shields.io/badge/MSRV-1.85-blue
 [rust_rel]: https://blog.rust-lang.org/2025/02/20/Rust-1.85.0/
-[no_std]: https://img.shields.io/badge/no__std-compatible-blue
-[lib_rs]: https://github.com/ajasmin/usize-conv/blob/readme_tweak/src/lib.rs
+[Latest Version]: https://img.shields.io/crates/v/usize-conv
+[crates.io]: https://crates.io/crates/usize-conv
+[Build Status]: https://img.shields.io/github/actions/workflow/status/ajasmin/usize-conv/ci.yml?branch=main
+[actions]: https://github.com/ajasmin/usize-conv/actions?query=branch%3Amain
+[docs]: https://img.shields.io/docsrs/usize-conv
+[docs.rs]: https://docs.rs/usize-conv/0.1.1/usize_conv/
 
 Infallible integer conversions to and from `usize` and `isize` under explicit
 portability guarantees.
