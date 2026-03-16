@@ -1,0 +1,20 @@
+[package]
+name = "usize-conv"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Infallible integer conversions to and from usize and isize under explicit portability guarantees"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ajasmin/usize-conv"
+keywords = ["usize", "isize", "integer", "conversion", "no_std"]
+categories = ["no-std"]
+
+[lib]
+
+[features]
+min-usize-32 = []
+min-usize-64 = ["min-usize-32"]
+from_usize = []
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
