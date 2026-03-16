@@ -8,7 +8,7 @@ FEATURES := \
 DOC_FEATURES_32 := min-usize-32,from_usize
 DOC_FEATURES_64 := min-usize-64,from_usize
 
-TARGET_POINTER_WIDTH := $(shell rustc --print cfg | sed -n 's/^target_pointer_width="\([0-9]*\)"/\1/p')
+TARGET_POINTER_WIDTH := $(shell cargo rustc -q -- --print cfg | sed -n 's/^target_pointer_width="\([0-9]*\)"/\1/p')
 MSRV := $(shell sed -n 's/^rust-version *= *"\(.*\)"/\1/p' Cargo.toml)
 
 ifeq ($(TARGET_POINTER_WIDTH),32)

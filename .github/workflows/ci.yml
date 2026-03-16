@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  ci-stable-64bit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - run: make ci
+
+  ci-msrv-64bit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Read crate metadata
+        id: metadata
+        run: echo "rust-version=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> $GITHUB_OUTPUT
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.metadata.outputs.rust-version }}
+          components: clippy, rustfmt
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - run: make ci
+
+  ci-stable-32bit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable i386 compatibility
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-multilib \
+            libc6-dev:i386
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+          targets: i686-unknown-linux-gnu
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - env:
+          CARGO_BUILD_TARGET: i686-unknown-linux-gnu
+        run: make ci
+
+  ci-msrv-32bit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable i386 compatibility
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-multilib \
+            libc6-dev:i386
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Read crate metadata
+        id: metadata
+        run: echo "rust-version=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> $GITHUB_OUTPUT
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.metadata.outputs.rust-version }}
+          components: clippy, rustfmt
+          targets: i686-unknown-linux-gnu
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - env:
+          CARGO_BUILD_TARGET: i686-unknown-linux-gnu
+        run: make ci
