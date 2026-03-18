@@ -2,7 +2,7 @@
 #![forbid(unsafe_code)]
 #![allow(clippy::doc_markdown)]
 #![doc = include_str!("../README.md")]
-// All casts are validated at compile time via `assert_infallible_cast!`
+// All casts are validated at compile time via `infallible_cast!`
 // and fallible conversions are guarded against being built on incompatible
 // targets.
 #![allow(clippy::cast_possible_truncation)]
@@ -12,8 +12,8 @@
 use core::num::{NonZero, NonZeroIsize, NonZeroUsize};
 
 #[cfg(any(feature = "min-usize-32", feature = "from_usize"))]
-macro_rules! assert_infallible_cast {
-    ($src:tt => $dst:tt) => {
+macro_rules! infallible_cast {
+    ($value:expr, $src:tt => $dst:tt) => {{
         const _: () = {
             const SRC_BITS: u32 = $src::BITS;
             const DST_BITS: u32 = $dst::BITS;
@@ -21,6 +21,7 @@ macro_rules! assert_infallible_cast {
             const SRC_SIGNED: bool = $src::MIN < 0;
             #[allow(unused_comparisons)] // silence warning on unsigned types
             const DST_SIGNED: bool = $dst::MIN < 0;
+
             assert!(match (SRC_SIGNED, DST_SIGNED) {
                 (false, false) => SRC_BITS <= DST_BITS,
                 (true, true) => SRC_BITS <= DST_BITS,
@@ -28,7 +29,10 @@ macro_rules! assert_infallible_cast {
                 (true, false) => false,
             });
         };
-    };
+
+        let value: $src = $value;
+        value as $dst
+    }};
 }
 
 #[cfg(feature = "min-usize-32")]
@@ -128,35 +132,27 @@ pub trait ToI128 {
 #[cfg(feature = "min-usize-32")]
 macro_rules! impl_to_usize {
     ($src:tt) => {
-        assert_infallible_cast!($src => usize);
-
         impl ToUsize for $src {
             #[inline]
             fn to_usize(self) -> usize {
-                // CAST: Validated by `assert_infallible_cast!($src => usize)`
-                // at the start of this macro expansion.
-                self as usize
+                infallible_cast!(self, $src => usize)
             }
         }
 
         impl ToUsize for NonZero<$src> {
             #[inline]
             fn to_usize(self) -> usize {
-                // CAST: Validated by `assert_infallible_cast!($src => usize)`
-                // at the start of this macro expansion.
-                self.get() as usize
+                infallible_cast!(self.get(), $src => usize)
             }
         }
 
         impl ToNonZeroUsize for NonZero<$src> {
             #[inline]
             fn to_nonzero_usize(self) -> NonZeroUsize {
-                // CAST: Validated by `assert_infallible_cast!($src => usize)`
-                // at the start of this macro expansion.
-                let val = self.get() as usize;
+                let val = infallible_cast!(self.get(), $src => usize);
 
-                // The source is non-zero and the cast is lossless, so the non-zero
-                // property is preserved.
+                // The source is non-zero, and the cast is lossless;
+                // the non-zero property is preserved.
                 NonZeroUsize::new(val).unwrap()
             }
         }
@@ -166,35 +162,27 @@ macro_rules! impl_to_usize {
 #[cfg(feature = "min-usize-32")]
 macro_rules! impl_to_isize {
     ($src:tt) => {
-        assert_infallible_cast!($src => isize);
-
         impl ToIsize for $src {
             #[inline]
             fn to_isize(self) -> isize {
-                // CAST: Validated by `assert_infallible_cast!($src => isize)`
-                // at the start of this macro expansion.
-                self as isize
+                infallible_cast!(self, $src => isize)
             }
         }
 
         impl ToIsize for NonZero<$src> {
             #[inline]
             fn to_isize(self) -> isize {
-                // CAST: Validated by `assert_infallible_cast!($src => isize)`
-                // at the start of this macro expansion.
-                self.get() as isize
+                infallible_cast!(self.get(), $src => isize)
             }
         }
 
         impl ToNonZeroIsize for NonZero<$src> {
             #[inline]
             fn to_nonzero_isize(self) -> NonZeroIsize {
-                // CAST: Validated by `assert_infallible_cast!($src => isize)`
-                // at the start of this macro expansion.
-                let val = self.get() as isize;
+                let val = infallible_cast!(self.get(), $src => isize);
 
-                // The source is non-zero and the cast is lossless, so the non-zero
-                // property is preserved.
+                // The source is non-zero, and the cast is lossless;
+                // the non-zero property is preserved.
                 NonZeroIsize::new(val).unwrap()
             }
         }
@@ -251,48 +239,38 @@ mod from_usize_mod {
     #[allow(clippy::wildcard_imports)]
     use super::*;
 
-    assert_infallible_cast!(usize => u64);
-
     impl ToU64 for usize {
         #[inline]
         fn to_u64(self) -> u64 {
-            self as u64
+            infallible_cast!(self, usize => u64)
         }
     }
-
-    assert_infallible_cast!(usize => u128);
 
     impl ToU128 for usize {
         #[inline]
         fn to_u128(self) -> u128 {
-            self as u128
+            infallible_cast!(self, usize => u128)
         }
     }
-
-    assert_infallible_cast!(usize => i128);
 
     impl ToI128 for usize {
         #[inline]
         fn to_i128(self) -> i128 {
-            self as i128
+            infallible_cast!(self, usize => i128)
         }
     }
-
-    assert_infallible_cast!(isize => i64);
 
     impl ToI64 for isize {
         #[inline]
         fn to_i64(self) -> i64 {
-            self as i64
+            infallible_cast!(self, isize => i64)
         }
     }
-
-    assert_infallible_cast!(isize => i128);
 
     impl ToI128 for isize {
         #[inline]
         fn to_i128(self) -> i128 {
-            self as i128
+            infallible_cast!(self, isize => i128)
         }
     }
 }
