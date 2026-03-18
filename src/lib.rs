@@ -14,16 +14,19 @@ macro_rules! infallible_cast {
         const _: () = {
             const SRC_BITS: u32 = $src::BITS;
             const DST_BITS: u32 = $dst::BITS;
-            #[allow(unused_comparisons)] // silence warning on unsigned types
-            const SRC_SIGNED: bool = $src::MIN < 0;
-            #[allow(unused_comparisons)] // silence warning on unsigned types
-            const DST_SIGNED: bool = $dst::MIN < 0;
 
-            assert!(match (SRC_SIGNED, DST_SIGNED) {
-                (false, false) => SRC_BITS <= DST_BITS,
-                (true, true) => SRC_BITS <= DST_BITS,
-                (false, true) => SRC_BITS < DST_BITS,
-                (true, false) => false,
+            const SIGNED: bool = true;
+            const UNSIGNED: bool = false;
+            #[allow(unused_comparisons)] // silence warning on unsigned types
+            const SRC_SIGNEDNESS: bool = $src::MIN < 0;
+            #[allow(unused_comparisons)] // silence warning on unsigned types
+            const DST_SIGNEDNESS: bool = $dst::MIN < 0;
+
+            assert!(match (SRC_SIGNEDNESS, DST_SIGNEDNESS) {
+                (UNSIGNED, UNSIGNED) => SRC_BITS <= DST_BITS,
+                (SIGNED, SIGNED) => SRC_BITS <= DST_BITS,
+                (UNSIGNED, SIGNED) => SRC_BITS < DST_BITS,
+                (SIGNED, UNSIGNED) => false,
             });
         };
 
