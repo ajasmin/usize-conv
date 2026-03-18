@@ -7,8 +7,8 @@
 use core::num::{NonZero, NonZeroIsize, NonZeroUsize};
 
 #[cfg(any(feature = "min-usize-32", feature = "from_usize"))]
-/// A zero-cost `as` cast that fails to compile if the conversion
-/// is not lossless and sign-safe.
+/// A zero-cost integer `as` cast that fails to compile unless the types
+/// guarantee a lossless, sign-safe conversion.
 macro_rules! infallible_cast {
     ($value:expr, $src:tt => $dst:tt) => {{
         const _: () = {
@@ -155,8 +155,8 @@ macro_rules! impl_to_usize {
             fn to_nonzero_usize(self) -> NonZeroUsize {
                 let val = infallible_cast!(self.get(), $src => usize);
 
-                // The source is non-zero, and the cast is lossless;
-                // the non-zero property is preserved.
+                // The source is non-zero and the cast is lossless,
+                // so the result cannot be zero; unwrap() is safe.
                 NonZeroUsize::new(val).unwrap()
             }
         }
