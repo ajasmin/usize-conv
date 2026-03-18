@@ -31,7 +31,12 @@ jobs:
 
       - name: Read crate metadata
         id: metadata
-        run: echo "rust-version=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> $GITHUB_OUTPUT
+        shell: python
+        run: |
+          import os, tomllib
+          data = tomllib.load(open("Cargo.toml", "rb"))
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"rust-version={data['package']['rust-version']}\n")
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
@@ -87,7 +92,12 @@ jobs:
 
       - name: Read crate metadata
         id: metadata
-        run: echo "rust-version=$(sed -ne 's/rust-version *= *\"\(.*\)\"/\1/p' Cargo.toml)" >> $GITHUB_OUTPUT
+        shell: python
+        run: |
+          import os, tomllib
+          data = tomllib.load(open("Cargo.toml", "rb"))
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"rust-version={data['package']['rust-version']}\n")
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@master
