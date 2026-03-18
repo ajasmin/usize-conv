@@ -301,6 +301,8 @@ mod from_usize_mod {
 mod tests {
     #[allow(clippy::wildcard_imports)]
     use super::*;
+
+    #[cfg(feature = "min-usize-32")]
     /// Helper to create NonZero values.
     macro_rules! nz {
         ($value:expr) => {
