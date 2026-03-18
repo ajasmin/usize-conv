@@ -8,6 +8,9 @@
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::cast_possible_wrap)]
 
+#[cfg(feature = "min-usize-32")]
+use core::num::{NonZero, NonZeroIsize, NonZeroUsize};
+
 #[cfg(any(feature = "min-usize-32", feature = "from_usize"))]
 macro_rules! assert_infallible_cast {
     ($src:tt => $dst:tt) => {
@@ -29,7 +32,7 @@ macro_rules! assert_infallible_cast {
 }
 
 #[cfg(feature = "min-usize-32")]
-/// Infallibly convert a value into `usize`.
+/// Infallibly convert a value into [`usize`].
 ///
 /// Implementations exist only when the conversion is guaranteed not
 /// to lose information under the selected `min-usize-*` portability
@@ -39,14 +42,32 @@ macro_rules! assert_infallible_cast {
 /// use usize_conv::ToUsize;
 ///
 /// let x: u16 = 5;
-/// assert_eq!(x.to_usize(), 5usize);
+/// assert_eq!(x.to_usize(), 5_usize);
 /// ```
 pub trait ToUsize {
     fn to_usize(self) -> usize;
 }
 
 #[cfg(feature = "min-usize-32")]
-/// Infallibly convert a value into `isize`.
+/// Infallibly convert a non-zero value into [`NonZeroUsize`].
+///
+/// Implementations exist only when the conversion is guaranteed not
+/// to lose information under the selected `min-usize-*` portability
+/// contract.
+///
+/// ```
+/// # use core::num::{NonZeroU16, NonZeroUsize};
+/// use usize_conv::ToNonZeroUsize;
+///
+/// let x: NonZeroU16 = 5.try_into().unwrap();
+/// assert_eq!(x.to_nonzero_usize(), NonZeroUsize::try_from(5).unwrap());
+/// ```
+pub trait ToNonZeroUsize {
+    fn to_nonzero_usize(self) -> NonZeroUsize;
+}
+
+#[cfg(feature = "min-usize-32")]
+/// Infallibly convert a value into [`isize`].
 ///
 /// Implementations exist only when the conversion is guaranteed not
 /// to lose information under the selected `min-usize-*` portability
@@ -56,10 +77,28 @@ pub trait ToUsize {
 /// use usize_conv::ToIsize;
 ///
 /// let x: i16 = -3;
-/// assert_eq!(x.to_isize(), -3isize);
+/// assert_eq!(x.to_isize(), -3_isize);
 /// ```
 pub trait ToIsize {
     fn to_isize(self) -> isize;
+}
+
+#[cfg(feature = "min-usize-32")]
+/// Infallibly convert a non-zero value into [`NonZeroIsize`].
+///
+/// Implementations exist only when the conversion is guaranteed not
+/// to lose information under the selected `min-usize-*` portability
+/// contract.
+///
+/// ```
+/// # use core::num::{NonZeroI16, NonZeroIsize};
+/// use usize_conv::ToNonZeroIsize;
+///
+/// let x = NonZeroI16::try_from(-3).unwrap();
+/// assert_eq!(x.to_nonzero_isize(), NonZeroIsize::try_from(-3).unwrap());
+/// ```
+pub trait ToNonZeroIsize {
+    fn to_nonzero_isize(self) -> NonZeroIsize;
 }
 
 #[cfg(feature = "from_usize")]
@@ -94,7 +133,31 @@ macro_rules! impl_to_usize {
         impl ToUsize for $src {
             #[inline]
             fn to_usize(self) -> usize {
+                // CAST: Validated by `assert_infallible_cast!($src => usize)`
+                // at the start of this macro expansion.
                 self as usize
+            }
+        }
+
+        impl ToUsize for NonZero<$src> {
+            #[inline]
+            fn to_usize(self) -> usize {
+                // CAST: Validated by `assert_infallible_cast!($src => usize)`
+                // at the start of this macro expansion.
+                self.get() as usize
+            }
+        }
+
+        impl ToNonZeroUsize for NonZero<$src> {
+            #[inline]
+            fn to_nonzero_usize(self) -> NonZeroUsize {
+                // CAST: Validated by `assert_infallible_cast!($src => usize)`
+                // at the start of this macro expansion.
+                let val = self.get() as usize;
+
+                // The source is non-zero and the cast is lossless, so the non-zero
+                // property is preserved.
+                NonZeroUsize::new(val).unwrap()
             }
         }
     };
@@ -108,54 +171,34 @@ macro_rules! impl_to_isize {
         impl ToIsize for $src {
             #[inline]
             fn to_isize(self) -> isize {
+                // CAST: Validated by `assert_infallible_cast!($src => isize)`
+                // at the start of this macro expansion.
                 self as isize
             }
         }
-    };
-}
 
-#[cfg(feature = "min-usize-32")]
-macro_rules! impl_nonzero_usize {
-    ($($src:tt),* $(,)?) => {
-        $(
-            impl ToUsize for $src {
-                #[inline]
-                fn to_usize(self) -> usize {
-                    self.get() as usize
-                }
+        impl ToIsize for NonZero<$src> {
+            #[inline]
+            fn to_isize(self) -> isize {
+                // CAST: Validated by `assert_infallible_cast!($src => isize)`
+                // at the start of this macro expansion.
+                self.get() as isize
             }
-        )*
-    };
-}
+        }
 
-#[cfg(feature = "min-usize-32")]
-macro_rules! impl_nonzero_isize {
-    ($($src:ty),* $(,)?) => {
-        $(
-            impl ToIsize for $src {
-                #[inline]
-                fn to_isize(self) -> isize {
-                    self.get() as isize
-                }
+        impl ToNonZeroIsize for NonZero<$src> {
+            #[inline]
+            fn to_nonzero_isize(self) -> NonZeroIsize {
+                // CAST: Validated by `assert_infallible_cast!($src => isize)`
+                // at the start of this macro expansion.
+                let val = self.get() as isize;
+
+                // The source is non-zero and the cast is lossless, so the non-zero
+                // property is preserved.
+                NonZeroIsize::new(val).unwrap()
             }
-        )*
+        }
     };
-}
-
-#[cfg(feature = "min-usize-32")]
-impl ToUsize for usize {
-    #[inline]
-    fn to_usize(self) -> usize {
-        self
-    }
-}
-
-#[cfg(feature = "min-usize-32")]
-impl ToIsize for isize {
-    #[inline]
-    fn to_isize(self) -> isize {
-        self
-    }
 }
 
 /// Define infallible conversions to `usize`/`isize` that are guaranteed
@@ -169,27 +212,18 @@ mod ge32 {
 
     #[allow(clippy::wildcard_imports)]
     use super::*;
-    use core::num::{NonZeroI8, NonZeroI16, NonZeroI32, NonZeroU8, NonZeroU16, NonZeroU32};
 
     impl_to_usize!(u8);
     impl_to_usize!(u16);
     impl_to_usize!(u32);
+    impl_to_usize!(usize);
 
     impl_to_isize!(u8);
     impl_to_isize!(i8);
     impl_to_isize!(u16);
     impl_to_isize!(i16);
     impl_to_isize!(i32);
-
-    impl_nonzero_usize!(NonZeroU8);
-    impl_nonzero_usize!(NonZeroU16);
-    impl_nonzero_usize!(NonZeroU32);
-
-    impl_nonzero_isize!(NonZeroU8);
-    impl_nonzero_isize!(NonZeroI8);
-    impl_nonzero_isize!(NonZeroU16);
-    impl_nonzero_isize!(NonZeroI16);
-    impl_nonzero_isize!(NonZeroI32);
+    impl_to_isize!(isize);
 }
 
 /// Define infallible conversions to `usize`/`isize` that are guaranteed on
@@ -203,15 +237,10 @@ mod ge64 {
 
     #[allow(clippy::wildcard_imports)]
     use super::*;
-    use core::num::{NonZeroI64, NonZeroU32, NonZeroU64};
 
     impl_to_isize!(u32);
     impl_to_usize!(u64);
     impl_to_isize!(i64);
-
-    impl_nonzero_usize!(NonZeroU64);
-    impl_nonzero_isize!(NonZeroU32);
-    impl_nonzero_isize!(NonZeroI64);
 }
 
 /// Define widening conversions whose source is `usize`/`isize`.
@@ -272,12 +301,17 @@ mod from_usize_mod {
 mod tests {
     #[allow(clippy::wildcard_imports)]
     use super::*;
+    /// Helper to create NonZero values.
+    macro_rules! nz {
+        ($value:expr) => {
+            const { ::core::num::NonZero::new($value).expect("nz!: value was zero") }
+        };
+    }
 
     #[cfg(feature = "min-usize-32")]
     mod ge32 {
         #[allow(clippy::wildcard_imports)]
         use super::*;
-        use core::num::{NonZeroI8, NonZeroI16, NonZeroI32, NonZeroU8, NonZeroU16, NonZeroU32};
 
         #[test]
         fn identity() {
@@ -305,31 +339,47 @@ mod tests {
         #[test]
         fn nonzero() {
             // to usize
-            let x = NonZeroU8::new(5).unwrap();
-            assert_eq!(x.to_usize(), 5);
+            let x = nz!(5_u8);
+            assert_eq!(x.to_nonzero_usize(), nz!(5_usize));
+            assert_eq!(x.to_usize(), 5_usize);
 
-            let x = NonZeroU16::new(5).unwrap();
-            assert_eq!(x.to_usize(), 5);
+            let x = nz!(6_u16);
+            assert_eq!(x.to_nonzero_usize(), nz!(6_usize));
+            assert_eq!(x.to_usize(), 6_usize);
 
-            let x = NonZeroU32::new(7).unwrap();
-            assert_eq!(x.to_usize(), 7);
+            let x = nz!(7_u32);
+            assert_eq!(x.to_nonzero_usize(), nz!(7_usize));
+            assert_eq!(x.to_usize(), 7_usize);
 
             // to isize (signed)
-            let y = NonZeroI8::new(-5).unwrap();
-            assert_eq!(y.to_isize(), -5);
+            let x = nz!(-5_i8);
+            assert_eq!(x.to_nonzero_isize(), nz!(-5_isize));
+            assert_eq!(x.to_isize(), -5_isize);
 
-            let y = NonZeroI16::new(-5).unwrap();
-            assert_eq!(y.to_isize(), -5);
+            let x = nz!(-6_i16);
+            assert_eq!(x.to_nonzero_isize(), nz!(-6_isize));
+            assert_eq!(x.to_isize(), -6_isize);
 
-            let y = NonZeroI32::new(-7).unwrap();
-            assert_eq!(y.to_isize(), -7);
+            let x = nz!(-7_i32);
+            assert_eq!(x.to_nonzero_isize(), nz!(-7_isize));
+            assert_eq!(x.to_isize(), -7_isize);
 
             // unsigned to isize (widening cross-sign)
-            let x = NonZeroU8::new(5).unwrap();
-            assert_eq!(x.to_isize(), 5);
+            let x = nz!(8_u8);
+            assert_eq!(x.to_nonzero_isize(), nz!(8_isize));
+            assert_eq!(x.to_isize(), 8_isize);
 
-            let x = NonZeroU16::new(5).unwrap();
-            assert_eq!(x.to_isize(), 5);
+            let x = nz!(9_u16);
+            assert_eq!(x.to_nonzero_isize(), nz!(9_isize));
+            assert_eq!(x.to_isize(), 9_isize);
+
+            let x = nz!(10_usize);
+            assert_eq!(x.to_nonzero_usize(), nz!(10_usize));
+            assert_eq!(x.to_usize(), 10_usize);
+
+            let x = nz!(10_isize);
+            assert_eq!(x.to_nonzero_isize(), nz!(10_isize));
+            assert_eq!(x.to_isize(), 10_isize);
         }
     }
 
@@ -337,7 +387,6 @@ mod tests {
     mod ge64 {
         #[allow(clippy::wildcard_imports)]
         use super::*;
-        use core::num::{NonZeroI64, NonZeroU32, NonZeroU64};
 
         #[test]
         fn basic() {
@@ -353,15 +402,18 @@ mod tests {
 
         #[test]
         fn nonzero() {
-            let x = NonZeroU64::new(9).unwrap();
-            assert_eq!(x.to_usize(), 9);
+            let x = nz!(9_u64);
+            assert_eq!(x.to_nonzero_usize(), nz!(9_usize));
+            assert_eq!(x.to_usize(), 9_usize);
 
-            let y = NonZeroI64::new(-9).unwrap();
-            assert_eq!(y.to_isize(), -9);
+            let x = nz!(-9_i64);
+            assert_eq!(x.to_nonzero_isize(), nz!(-9_isize));
+            assert_eq!(x.to_isize(), -9_isize);
 
             // u32 -> isize: only valid on 64-bit
-            let x = NonZeroU32::new(7).unwrap();
-            assert_eq!(x.to_isize(), 7);
+            let x = nz!(7_u32);
+            assert_eq!(x.to_nonzero_isize(), nz!(7_isize));
+            assert_eq!(x.to_isize(), 7_isize);
         }
     }
 
