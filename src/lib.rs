@@ -14,10 +14,10 @@ macro_rules! assert_infallible_cast {
         const _: () = {
             const SRC_BITS: u32 = $src::BITS;
             const DST_BITS: u32 = $dst::BITS;
-            #[allow(clippy::cast_sign_loss)]
-            const SRC_SIGNED: bool = (-1_i8 as $src) < (0 as $src);
-            #[allow(clippy::cast_sign_loss)]
-            const DST_SIGNED: bool = (-1_i8 as $dst) < (0 as $dst);
+            #[allow(unused_comparisons)] // silence warning on unsigned types
+            const SRC_SIGNED: bool = $src::MIN < 0;
+            #[allow(unused_comparisons)] // silence warning on unsigned types
+            const DST_SIGNED: bool = $dst::MIN < 0;
             assert!(match (SRC_SIGNED, DST_SIGNED) {
                 (false, false) => SRC_BITS <= DST_BITS,
                 (true, true) => SRC_BITS <= DST_BITS,
