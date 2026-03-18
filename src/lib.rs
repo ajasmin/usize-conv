@@ -12,6 +12,8 @@
 use core::num::{NonZero, NonZeroIsize, NonZeroUsize};
 
 #[cfg(any(feature = "min-usize-32", feature = "from_usize"))]
+/// A zero-cost `as` cast that fails to compile if the conversion
+/// is not lossless and sign-safe.
 macro_rules! infallible_cast {
     ($value:expr, $src:tt => $dst:tt) => {{
         const _: () = {
