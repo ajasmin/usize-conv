@@ -1,11 +1,15 @@
 [package]
 name = "usize-conv"
+description = "Infallible integer conversions to and from usize and isize under explicit portability guarantees"
+readme = "README.md"
+repository = "https://github.com/ajasmin/usize-conv"
 version = "0.1.1"
+
 edition = "2024"
 rust-version = "1.85"
-description = "Infallible integer conversions to and from usize and isize under explicit portability guarantees"
+
+authors = ["Alexandre Jasmin <code@ajasmin.net>"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/ajasmin/usize-conv"
 keywords = ["usize", "isize", "integer", "conversion", "no_std"]
 categories = ["no-std"]
 
