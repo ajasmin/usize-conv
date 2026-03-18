@@ -2,11 +2,6 @@
 #![forbid(unsafe_code)]
 #![allow(clippy::doc_markdown)]
 #![doc = include_str!("../README.md")]
-// All casts are validated at compile time via `infallible_cast!`
-// and fallible conversions are guarded against being built on incompatible
-// targets.
-#![allow(clippy::cast_possible_truncation)]
-#![allow(clippy::cast_possible_wrap)]
 
 #[cfg(feature = "min-usize-32")]
 use core::num::{NonZero, NonZeroIsize, NonZeroUsize};
@@ -32,8 +27,12 @@ macro_rules! infallible_cast {
             });
         };
 
-        let value: $src = $value;
-        value as $dst
+        #[allow(clippy::cast_possible_truncation)]
+        #[allow(clippy::cast_possible_wrap)]
+        {
+            let value: $src = $value;
+            value as $dst
+        }
     }};
 }
 
